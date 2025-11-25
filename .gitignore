@@ -1,0 +1,94 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+python-version
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+.env
+.env.*
+secrets.yml
+
+# Logs
+logs/
+*.log
+
+# Data and datasets (untracked by default)
+data/
+datasets/
+*.csv
+*.tsv
+*.arff
+
+# Model checkpoints / weights
+checkpoints/
+models/
+*.pt
+*.pth
+*.h5
+*.ckpt
+
+# Training outputs
+outputs/
+results/
+predictions/
+
+# ML frameworks cache
+.cache/
+node_modules/
+
+# Compiled C/C++/C# files
+*.o
+*.obj
+*.dll
+*.exe
+
+# Archive files
+*.zip
+*.tar.gz
+*.tar
+*.gz
