@@ -57,13 +57,6 @@ secrets.yml
 logs/
 *.log
 
-# Data and datasets (untracked by default)
-data/
-datasets/
-*.csv
-*.tsv
-*.arff
-
 # Model checkpoints / weights
 checkpoints/
 models/
