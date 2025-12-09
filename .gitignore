@@ -6,12 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Virtual environments
-venv/
-env/
-.venv/
-ENV/
-
 # Distribution / packaging
 build/
 dist/
@@ -57,13 +51,6 @@ secrets.yml
 logs/
 *.log
 
-# Model checkpoints / weights
-checkpoints/
-models/
-*.pt
-*.pth
-*.h5
-*.ckpt
 
 # Training outputs
 outputs/
