@@ -2,16 +2,16 @@ import torch
 import numpy as np
 from train import PhishingCNN1D
 
-def predict_phishing(features, model_path='C:/Users/MI/Phishing-website/best_model.pth'):
+def predict_phishing_with_accuracy(features, model_path='C:/Users/MI/Phishing-website/best_model.pth'):
     """
-    预测网站是否为钓鱼网站
+    预测网站类型并输出准确率信息
     
     参数:
         features: 30个特征值的列表，取值为-1, 0, 1
         model_path: 模型文件路径
         
     返回:
-        str: "钓鱼网站" 或 "正常网站"
+        tuple: (预测结果, 预测概率, 置信度)
     """
     # 加载模型
     checkpoint = torch.load(model_path, map_location='cpu')
@@ -28,19 +28,23 @@ def predict_phishing(features, model_path='C:/Users/MI/Phishing-website/best_mod
         prediction = model(features_tensor)
         probability = prediction.item()
     
-    # 返回结果
+    # 分类
     if probability > 0.5:
-        return "钓鱼网站"
+        result = "钓鱼网站"
+        confidence = probability
     else:
-        return "正常网站"
-
+        result = "正常网站"
+        confidence = 1 - probability
+    
+    # 置信度可以作为模型对当前预测的"准确率"估计
+    return result, probability, confidence
 
 # 使用示例
 if __name__ == "__main__":
     # 输入30个特征值
-    features = [1, 1, 1, 1, 1, 1, 0, 1, 0, 0,
-                1, 1, 1, -1, -1, 1, 1, -1, 1, 1,
-                1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+    features = [-1,-1,-1,-1,-1,-1,-1,1,0,0,-1,-1,-1,0,1,-1,-1,1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,0,-1]
     
-    result = predict_phishing(features)
+    result, prob, confidence = predict_phishing_with_accuracy(features)
     print(f"预测结果: {result}")
+    print(f"预测概率: {prob:.4f}")
+    print(f"置信度（准确率估计）: {confidence:.2%}")
