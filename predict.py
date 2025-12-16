@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 from train import PhishingCNN1D
-
-def predict_phishing_with_accuracy(features, model_path='C:/Users/MI/Phishing-website/best_model.pth'):
+import judge_port
+def predict_phishing_with_accuracy(features, model_path='best_model.pth'):
     """
     预测网站类型并输出准确率信息
     
@@ -40,11 +40,11 @@ def predict_phishing_with_accuracy(features, model_path='C:/Users/MI/Phishing-we
     return result, probability, confidence
 
 # 使用示例
+
 if __name__ == "__main__":
     # 输入30个特征值
-    features = [-1,-1,-1,-1,-1,-1,-1,1,0,0,-1,-1,-1,0,1,-1,-1,1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,0,-1]
-    
-    result, prob, confidence = predict_phishing_with_accuracy(features)
+    x="https://www.baidu.com"   
+    result, prob, confidence = predict_phishing_with_accuracy(x)
     print(f"预测结果: {result}")
     print(f"预测概率: {prob:.4f}")
     print(f"置信度（准确率估计）: {confidence:.2%}")
