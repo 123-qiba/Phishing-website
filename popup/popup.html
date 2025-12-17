@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>网站安全评估</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <div class="title">网站安全评估</div>
+        <div class="subtitle" id="currentUrl">URL：-</div>
+      </div>
+      <button class="btn btn-primary" id="refreshBtn">刷新</button>
+    </header>
+
+    <section class="panel">
+      <div class="score-row">
+        <div class="grade" id="grade">-</div>
+        <div class="score-meta">
+          <div class="score" id="score">Score: -</div>
+          <div class="badge" id="badge">等待评估</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="stats">
+          <div class="stat">
+            <div class="k">黑名单命中</div>
+            <div class="v" id="blacklistCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="k">可疑 DOM</div>
+            <div class="v" id="domCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="k">危险请求</div>
+            <div class="v" id="requestCount">0</div>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <canvas id="riskChart" height="220"></canvas>
+          <div class="hint" id="chartHint">风险来源分布</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="small" id="updatedAt">更新时间：-</div>
+    </footer>
+
+    <!-- ✅ 本地 Chart.js 必须在 popup.js 之前 -->
+    <script src="chart.min.js"></script>
+    <script src="popup.js"></script>
+  </div>
+</body>
+</html>
