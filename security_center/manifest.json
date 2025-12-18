@@ -10,7 +10,7 @@
     ],
     "action": {
         "default_title": "打开安全中心",
-        "default_popup": "pages/security_center.html"
+        "default_popup": "pages/popup.html"
     },
     "options_page": "pages/security_center.html",
     "icons": {

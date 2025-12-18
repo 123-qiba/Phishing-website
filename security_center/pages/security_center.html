@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
@@ -17,7 +19,7 @@
                 <div class="logo-icon">🛡️</div>
                 <h1>安全中心</h1>
             </div>
-            
+
             <nav class="nav-menu">
                 <button class="nav-item active" data-tab="history">
                     <span class="icon">🕒</span>
@@ -43,15 +45,22 @@
             <!-- Header -->
             <header class="top-bar">
                 <h2 id="page-title">历史记录</h2>
-                <div class="user-status">
-                    <span class="status-dot"></span>
-                    <span>保护中</span>
+                <div class="top-bar-actions">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="btn btn-secondary btn-sm" aria-label="切换主题">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    <!-- User Status -->
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        <span>保护中</span>
+                    </div>
                 </div>
             </header>
 
             <!-- Dynamic Content Sections -->
             <div class="content-wrapper">
-                
+
                 <!-- History Section -->
                 <section id="history-section" class="tab-content active">
                     <div class="card glass-panel">
@@ -110,37 +119,55 @@
                 <!-- Knowledge Base Section -->
                 <section id="knowledge-section" class="tab-content">
                     <div class="grid-layout">
-                        <div class="card glass-panel knowledge-card">
-                            <div class="icon-header">🎣</div>
-                            <h3>什么是网络钓鱼？</h3>
-                            <p>网络钓鱼（Phishing）是指攻击者通过伪装成可信实体（如银行、社交网站）来诱骗用户泄露敏感信息（如密码、信用卡号）的行为。</p>
-                            <a href="#" class="learn-more">了解更多</a>
-                        </div>
+                        <!-- Threat 1: Malicious URLs (Module 1) -->
                         <div class="card glass-panel knowledge-card">
                             <div class="icon-header">🔗</div>
-                            <h3>如何识别恶意链接？</h3>
-                            <p>检查域名拼写错误（如 g0ogle.com）、使用了短链接服务、或者通过邮件/短信收到的意外链接。</p>
-                            <a href="#" class="learn-more">了解更多</a>
+                            <h3>恶意链接传播</h3>
+                            <p>攻击者通过邮件或短信传播已知的钓鱼网址。<b>解决模块：模块 1 (智能拦截)</b></p>
+                            <span class="learn-more" data-topic="threat-url">了解更多</span>
                         </div>
+
+                        <!-- Threat 2: Low Reputation (Module 2) -->
                         <div class="card glass-panel knowledge-card">
-                            <div class="icon-header">🔒</div>
-                            <h3>HTTPS 的重要性</h3>
-                            <p>HTTPS 加密了您的浏览器和网站之间的数据传输，防止数据被窃听。但请注意，HTTPS 并不意味着网站本身是合法的（钓鱼网站也可能使用 HTTPS）。</p>
-                            <a href="#" class="learn-more">了解更多</a>
+                            <div class="icon-header">⚠️</div>
+                            <h3>网站信誉风险</h3>
+                            <p>某些网站虽然未被列入黑名单，但表现出高风险特征。<b>解决模块：模块 2 (安全评分)</b></p>
+                            <span class="learn-more" data-topic="threat-reputation">了解更多</span>
                         </div>
+
+                        <!-- Threat 3: Visual Deception (Module 3) -->
                         <div class="card glass-panel knowledge-card">
-                            <div class="icon-header">🛑</div>
-                            <h3>遇到危险该怎么办？</h3>
-                            <p>立即关闭页面，不要输入任何信息。如果您已经输入了密码，请立即在安全的设备上更改密码。</p>
-                            <a href="#" class="learn-more">了解更多</a>
+                            <div class="icon-header">👁️</div>
+                            <h3>视觉欺诈与伪造</h3>
+                            <p>网站模仿银行或官方机构的登录界面进行欺诈。<b>解决模块：模块 3 (DOM 分析)</b></p>
+                            <span class="learn-more" data-topic="threat-visual">了解更多</span>
+                        </div>
+
+                        <!-- Threat 4: False Security (Module 5) -->
+                        <div class="card glass-panel knowledge-card">
+                            <div class="icon-header">🔓</div>
+                            <h3>虚假安全陷阱</h3>
+                            <p>网站使用 HTTPS 但证书不可信，或包含混合内容。<b>解决模块：模块 5 (透明报告)</b></p>
+                            <span class="learn-more" data-topic="threat-https">了解更多</span>
                         </div>
                     </div>
                 </section>
 
             </div>
         </main>
+
+        <!-- Modal for Detailed Views -->
+        <div id="knowledge-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <div class="modal-body" id="modal-body-content">
+                    <!-- Generic Content -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="../js/security_center.js"></script>
 </body>
+
 </html>
