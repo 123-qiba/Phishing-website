@@ -160,11 +160,23 @@ function initBlacklist() {
 }
 
 function loadBlacklist() {
-    const mockBlacklist = ['evil-site.com', 'phishing-example.net'];
-    chrome.storage.local.get(['userBlacklist'], (result) => {
-        let list = result.userBlacklist || mockBlacklist;
-        renderBlacklist(list);
-    });
+    const SERVER_URL = 'http://localhost:8000/blacklist';
+    fetch(SERVER_URL)
+        .then(response => response.json())
+        .then(list => {
+            console.log('Blacklist loaded from server:', list);
+            renderBlacklist(list);
+            // Sync to chrome storage for other modules to use (optional but good for consistency)
+            chrome.storage.local.set({ userBlacklist: list });
+        })
+        .catch(error => {
+            console.error('Error loading blacklist from server:', error);
+            // Fallback to local storage if server is down
+            chrome.storage.local.get(['userBlacklist'], (result) => {
+                const list = result.userBlacklist || [];
+                renderBlacklist(list);
+            });
+        });
 }
 
 function renderBlacklist(list) {
@@ -198,25 +210,54 @@ function renderBlacklist(list) {
 }
 
 function addToBlacklist(url) {
-    chrome.storage.local.get(['userBlacklist'], (result) => {
-        let list = result.userBlacklist || [];
-        if (!list.includes(url)) {
-            list.push(url);
-            chrome.storage.local.set({ userBlacklist: list }, () => {
-                loadBlacklist();
-            });
-        }
-    });
+    const SERVER_URL = 'http://localhost:8000/blacklist';
+
+    // First fetch latest to ensure we don't overwrite
+    fetch(SERVER_URL)
+        .then(res => res.json())
+        .then(list => {
+            if (!list.includes(url)) {
+                list.push(url);
+                updateServerBlacklist(list);
+            }
+        })
+        .catch(err => {
+            console.error('Server error, falling back to local storage', err);
+            // Fallback logic could be added here
+        });
 }
 
 function removeFromBlacklist(url) {
-    chrome.storage.local.get(['userBlacklist'], (result) => {
-        let list = result.userBlacklist || [];
-        list = list.filter(item => item !== url);
-        chrome.storage.local.set({ userBlacklist: list }, () => {
-            loadBlacklist();
+    const SERVER_URL = 'http://localhost:8000/blacklist';
+
+    fetch(SERVER_URL)
+        .then(res => res.json())
+        .then(list => {
+            const newList = list.filter(item => item !== url);
+            updateServerBlacklist(newList);
+        })
+        .catch(err => {
+            console.error('Server error', err);
         });
-    });
+}
+
+function updateServerBlacklist(list) {
+    const SERVER_URL = 'http://localhost:8000/blacklist';
+    fetch(SERVER_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(list)
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Server update success:', data);
+            loadBlacklist(); // Reload UI
+        })
+        .catch(err => {
+            console.error('Failed to update server', err);
+        });
 }
 
 // --- Knowledge Base Module ---
