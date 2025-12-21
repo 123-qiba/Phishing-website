@@ -199,8 +199,8 @@ class MultiModelEvaluator:
 def main():
     """主评估函数"""
     # 配置
-    model_dir = 'C:/Users/MI/Phishing-website/saved_models'  # 模型保存目录
-    test_csv_path = "C:/Users/MI/Phishing-website/data/independent_test.csv"  # 测试集路径
+    model_dir = 'S:/课程/计网/小组作业/Phishing-website/saved_models'  # 模型保存目录
+    test_csv_path = "S:/课程/计网/小组作业/Phishing-website/data/independent_test.csv"  # 测试集路径
     
     # 创建评估器
     evaluator = MultiModelEvaluator(model_dir)
