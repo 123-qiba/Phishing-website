@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全拦截 - 网站安全卫士</title>
+    <link rel="stylesheet" href="blocked.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 警告头部 -->
+        <div class="warning-header" id="warning-header">
+            <div class="warning-icon">
+                <i class="fas fa-shield-alt" id="threat-icon"></i>
+            </div>
+            <h1 id="threat-title">安全警告</h1>
+            <p class="subtitle" id="subtitle-text">网站安全卫士已阻止您访问此页面</p>
+        </div>
+
+        <!-- 威胁详情卡片 -->
+        <div class="threat-card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2>威胁详情</h2>
+            </div>
+            
+            <div class="threat-info">
+                <div class="info-item">
+                    <span class="info-label">威胁类型：</span>
+                    <span id="threat-type" class="threat-badge">检测中...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">网站地址：</span>
+                    <code id="blocked-url" class="url-display">加载中...</code>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">域名：</span>
+                    <code id="blocked-hostname" class="url-display">加载中...</code>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">威胁等级：</span>
+                    <span id="threat-level">
+                        <span class="severity-dot" id="severity-dot"></span>
+                        <span id="severity-text">评估中...</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">拦截时间：</span>
+                    <span id="intercept-time">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">拦截ID：</span>
+                    <code id="intercept-id" class="code-display">--</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- 威胁解释与建议 -->
+        <div class="explanation-card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i>
+                <h2>威胁说明</h2>
+            </div>
+            
+            <div class="explanation-content">
+                <h3><i class="fas fa-question-circle"></i> 这是什么威胁？</h3>
+                <p id="threat-description">正在分析威胁详情...</p>
+                
+                <h3><i class="fas fa-lightbulb"></i> 如何保护自己？</h3>
+                <div class="advice-list" id="advice-list">
+                    <div class="advice-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>不要在此页面输入任何个人信息</span>
+                    </div>
+                    <div class="advice-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>立即关闭此标签页</span>
+                    </div>
+                    <div class="advice-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>不要下载此网站的任何文件</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮区域 -->
+        <div class="action-section">
+            <div class="action-buttons">
+                <button id="go-back-btn" class="btn btn-safe">
+                    <i class="fas fa-arrow-left"></i> 返回安全页面
+                </button>
+                <button id="proceed-btn" class="btn btn-danger">
+                    <i class="fas fa-exclamation-circle"></i> 仍要访问
+                </button>
+            </div>
+            
+            <div class="quick-actions">
+                <a href="#" id="learn-more-link" class="quick-link">
+                    <i class="fas fa-book"></i> 了解此威胁
+                </a>
+                <a href="#" id="report-link" class="quick-link">
+                    <i class="fas fa-flag"></i> 报告误报
+                </a>
+                <a href="#" id="more-info-link" class="quick-link">
+                    <i class="fas fa-ellipsis-h"></i> 更多选项
+                </a>
+            </div>
+        </div>
+
+        <!-- 页脚信息 -->
+        <div class="footer-info">
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>网站安全卫士 - 安全拦截系统</span>
+            </div>
+            <div class="footer-links">
+                <a href="#" id="privacy-link">隐私声明</a>
+                <span class="separator">|</span>
+                <a href="#" id="help-link">帮助中心</a>
+                <span class="separator">|</span>
+                <a href="#" id="feedback-link">意见反馈</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 风险确认对话框 -->
+    <div id="risk-dialog" class="modal-dialog">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h3><i class="fas fa-radiation"></i> 高风险确认</h3>
+                <button class="dialog-close" id="dialog-close-btn">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>您确定要继续访问这个高风险网站吗？</p>
+                </div>
+                
+                <div class="risk-summary">
+                    <p><strong>网站：</strong><code id="dialog-url">--</code></p>
+                    <p><strong>威胁：</strong><span id="dialog-threat">--</span></p>
+                    <p><strong>等级：</strong><span id="dialog-level">--</span></p>
+                </div>
+                
+                <div class="risk-warning">
+                    <h4><i class="fas fa-skull-crossbones"></i> 潜在风险</h4>
+                    <ul id="risk-list">
+                        <li>个人信息被盗取</li>
+                        <li>设备感染恶意软件</li>
+                        <li>财务损失风险</li>
+                        <li>隐私泄露</li>
+                    </ul>
+                </div>
+                
+                <div class="acknowledge-section">
+                    <label class="acknowledge-checkbox">
+                        <input type="checkbox" id="risk-acknowledge">
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">我理解风险并愿意承担所有后果</span>
+                    </label>
+                    
+                    <div class="additional-options">
+                        <label class="option-checkbox">
+                            <input type="checkbox" id="dont-show-again">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">不再显示此警告</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button id="cancel-btn" class="btn btn-secondary">取消</button>
+                <button id="confirm-proceed-btn" class="btn btn-danger" disabled>
+                    <i class="fas fa-external-link-alt"></i> 确认继续访问
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更多选项菜单 -->
+    <div id="options-menu" class="dropdown-menu">
+        <div class="menu-content">
+            <a href="#" class="menu-item" id="view-details-item">
+                <i class="fas fa-file-alt"></i> 查看详细报告
+            </a>
+            <a href="#" class="menu-item" id="whitelist-item">
+                <i class="fas fa-check-circle"></i> 添加白名单
+            </a>
+            <a href="#" class="menu-item" id="security-center-item">
+                <i class="fas fa-sliders-h"></i> 安全设置
+            </a>
+            <div class="menu-divider"></div>
+            <a href="#" class="menu-item" id="refresh-item">
+                <i class="fas fa-redo"></i> 重新检测
+            </a>
+            <a href="#" class="menu-item" id="copy-url-item">
+                <i class="fas fa-copy"></i> 复制网址
+            </a>
+        </div>
+    </div>
+
+    <script src="blocked.js"></script>
+</body>
+</html>
