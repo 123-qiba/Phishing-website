@@ -1,0 +1,720 @@
+/* ===== 基础重置 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 30px;
+    position: relative;
+}
+
+/* ===== 警告头部 ===== */
+.warning-header {
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 威胁等级颜色 */
+.warning-header.critical {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.warning-header.high {
+    background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+}
+
+.warning-header.medium {
+    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+}
+
+.warning-header.low {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.warning-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.warning-header h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+    font-size: 1.1em;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* ===== 卡片样式 ===== */
+.threat-card, .explanation-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    transition: transform 0.3s ease;
+}
+
+.threat-card:hover, .explanation-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f3f5;
+}
+
+.card-header i {
+    font-size: 24px;
+    margin-right: 12px;
+}
+
+.threat-card .card-header i {
+    color: #e74c3c;
+}
+
+.explanation-card .card-header i {
+    color: #3498db;
+}
+
+.card-header h2 {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* ===== 威胁信息网格 ===== */
+.threat-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.url-display, .code-display {
+    background: #e9ecef;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    word-break: break-all;
+    color: #e74c3c;
+}
+
+.code-display {
+    background: #f1f3f5;
+    color: #7f8c8d;
+    font-size: 0.85em;
+}
+
+/* 威胁徽章 */
+.threat-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.threat-badge.critical { background: #e74c3c; }
+.threat-badge.high { background: #f39c12; }
+.threat-badge.medium { background: #f1c40f; color: #2c3e50; }
+.threat-badge.low { background: #3498db; }
+.threat-badge.suspicious { background: #95a5a6; }
+
+/* 威胁等级指示器 */
+.severity-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.severity-dot.critical { background: #e74c3c; }
+.severity-dot.high { background: #f39c12; }
+.severity-dot.medium { background: #f1c40f; }
+.severity-dot.low { background: #3498db; }
+.severity-dot.suspicious { background: #95a5a6; }
+
+/* ===== 解释内容 ===== */
+.explanation-content h3 {
+    color: #2c3e50;
+    margin: 20px 0 15px;
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+}
+
+.explanation-content h3 i {
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+#threat-description {
+    line-height: 1.7;
+    color: #495057;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.advice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.advice-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(to right, #74b9ff, #0984e3);
+    color: white;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.advice-item:hover {
+    transform: translateX(5px);
+}
+
+.advice-item i {
+    margin-right: 12px;
+    font-size: 1.1em;
+}
+
+/* ===== 操作区域 ===== */
+.action-section {
+    margin: 30px 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+.btn-safe {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+}
+
+.btn-safe:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.btn-secondary {
+    background: #f1f3f5;
+    color: #495057;
+    border: 2px solid #dee2e6;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.quick-link {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.95em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.quick-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* ===== 页脚 ===== */
+.footer-info {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    color: #636e72;
+}
+
+.security-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+}
+
+.security-badge i {
+    color: #3498db;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.85em;
+}
+
+.footer-links a {
+    color: #7f8c8d;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #3498db;
+}
+
+.separator {
+    color: #bdc3c7;
+}
+
+/* ===== 对话框样式 ===== */
+.modal-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.dialog-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dialog-header {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dialog-header h3 {
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dialog-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.dialog-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dialog-body {
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.warning-message {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.warning-message i {
+    font-size: 1.5em;
+    color: #ffc107;
+}
+
+.risk-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.risk-summary p {
+    margin-bottom: 8px;
+    display: flex;
+}
+
+.risk-summary strong {
+    min-width: 60px;
+    color: #495057;
+}
+
+.risk-warning {
+    background: #ffeaea;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.risk-warning h4 {
+    color: #e74c3c;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#risk-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+#risk-list li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+#risk-list li:before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    color: #e74c3c;
+}
+
+.acknowledge-section {
+    margin: 20px 0;
+}
+
+.acknowledge-checkbox, .option-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.acknowledge-checkbox input, .option-checkbox input {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.acknowledge-checkbox:hover .checkmark,
+.option-checkbox:hover .checkmark {
+    border-color: #3498db;
+}
+
+.acknowledge-checkbox input:checked ~ .checkmark,
+.option-checkbox input:checked ~ .checkmark {
+    background: #3498db;
+    border-color: #3498db;
+}
+
+.checkmark:after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.acknowledge-checkbox input:checked ~ .checkmark:after,
+.option-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-label {
+    font-size: 0.95em;
+    color: #495057;
+}
+
+.additional-options {
+    margin-left: 30px;
+    margin-top: 10px;
+}
+
+.dialog-footer {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* ===== 下拉菜单 ===== */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    min-width: 200px;
+    animation: fadeIn 0.2s ease;
+}
+
+.menu-content {
+    padding: 8px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    font-size: 0.95em;
+}
+
+.menu-item:hover {
+    background: #f8f9fa;
+}
+
+.menu-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: #7f8c8d;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #e9ecef;
+    margin: 8px 0;
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+    
+    .warning-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .threat-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        min-width: 100%;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .footer-links {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    .threat-card, .explanation-card {
+        padding: 20px;
+    }
+    
+    .dialog-content {
+        width: 95%;
+    }
+}
+
+/* ===== 打印样式 ===== */
+@media print {
+    .action-section,
+    .quick-actions,
+    .footer-links {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+    
+    .container {
+        box-shadow: none !important;
+        padding: 10px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    .warning-header {
+        background: #e74c3c !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .modal-dialog,
+    .dropdown-menu {
+        display: none !important;
+    }
+}

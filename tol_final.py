@@ -19,6 +19,9 @@ class DetectionWorker(QThread):
     error = pyqtSignal(str)
     
     def __init__(self, url, model_path=None):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(base_dir, "best_model.pth")
+
         super().__init__()
         self.url = url
         self.model_path = model_path
@@ -45,8 +48,11 @@ class DetectionWorker(QThread):
             self.progress.emit(80, "正在分析...")
             
             # 获取预测结果
-            result_str, probability, confidence = predict.predict_phishing_with_accuracy(features)            
-            
+            result_str, probability, confidence = predict.predict_phishing_with_accuracy(
+                features,
+                self.model_path
+            )
+          
             # 创建完整的结果字典
             result_dict = {
                 'url': self.url,
@@ -339,81 +345,105 @@ class SimpleDetectorWindow(QMainWindow):
         # 更新状态
         self.statusBar().showMessage(f'检测完成: {result_dict["url"]}')
         
-        # 显示主要结果
-        if result_dict['result'] == "钓鱼网站":
-            # 钓鱼网站 - 红色警告
+        # 获取警告信息列表
+        warnings = result_dict.get('warnings', [])
+        
+        # --- 核心修改逻辑开始 ---
+        # 筛选出实际的风险警告（包含 ⚠️ 图标的项）
+        risk_warnings = [w for w in warnings if "⚠️" in w]
+        
+        # 只要存在风险警告，无论概率多少，都强制标记为高风险拦截
+        if len(risk_warnings) > 0:
+            # 强制设置为红色高风险样式
             color = "#721c24"
             bg_color = "#f8d7da"
             border_color = "#f5c6cb"
-            risk_text = f"钓鱼网站 (风险等级: {result_dict['risk_level']})"
+            risk_text = f"安全拦截 ({len(risk_warnings)}个风险特征)"
             icon = "⚠️ "
-        else:
-            # 正常网站 - 绿色安全
-            color = "#155724"
-            bg_color = "#d4edda"
-            border_color = "#c3e6cb"
-            risk_text = "正常网站"
-            icon = "✅ "
-        
-        self.result_label.setText(f"{icon} {risk_text}")
-        self.result_label.setStyleSheet(f"""
-            background-color: {bg_color};
-            color: {color};
-            border: 2px solid {border_color};
-        """)
-        
-        # 显示概率信息
-        probability = result_dict['probability']
-        confidence = result_dict['confidence']
-        
-        self.probability_label.setText(f"非法概率: {probability:.2%}")
-        self.risk_label.setText(f"风险等级: {result_dict['risk_level']}")
-        
-        # 显示警告信息
-        warnings = result_dict.get('warnings', [])
-        if warnings:
+            
+            # 更新主要结果标签
+            self.result_label.setText(f"{icon} {risk_text}")
+            self.result_label.setStyleSheet(f"""
+                background-color: {bg_color};
+                color: {color};
+                border: 2px solid {border_color};
+            """)
+            
+            # 显示警告文本
             warning_text = "\n".join(warnings)
             self.warning_text.setText(warning_text)
+            self.warning_text.setStyleSheet("color: #dc3545;")
             
-            # 如果有高风险警告，设置为红色
-            if "⚠️" in warning_text:
+            # 强制更新概率和风险等级显示（仅用于显示，不影响逻辑）
+            probability = result_dict['probability']
+            self.probability_label.setText(f"非法概率: {probability:.2%}")
+            self.risk_label.setText(f"风险等级: 拦截") # 强制显示为拦截
+            
+            # 立即触发弹窗，传入具体的风险警告列表
+            self.show_alert_dialog(result_dict, risk_warnings)
+            
+        else:
+            # 如果没有特定特征警告，走原有的概率判断逻辑（或者认为是安全的）
+            if result_dict['result'] == "钓鱼网站":
+                 # 钓鱼网站 - 红色警告 (虽然没有特征触发，但模型认为有风险)
+                color = "#721c24"
+                bg_color = "#f8d7da"
+                border_color = "#f5c6cb"
+                risk_text = f"钓鱼网站 (风险等级: {result_dict['risk_level']})"
+                icon = "⚠️ "
+                self.warning_text.setText("模型预测为高风险，但未命中特定规则特征。")
                 self.warning_text.setStyleSheet("color: #dc3545;")
             else:
+                # 正常网站 - 绿色安全
+                color = "#155724"
+                bg_color = "#d4edda"
+                border_color = "#c3e6cb"
+                risk_text = "正常网站"
+                icon = "✅ "
+                self.warning_text.setText("✅ 未检测到明显风险特征")
                 self.warning_text.setStyleSheet("color: #28a745;")
-        else:
-            self.warning_text.setText("未检测到明显的风险特征。")
-            self.warning_text.setStyleSheet("color: #6c757d;")
+
+            self.result_label.setText(f"{icon} {risk_text}")
+            self.result_label.setStyleSheet(f"""
+                background-color: {bg_color};
+                color: {color};
+                border: 2px solid {border_color};
+            """)
+            
+            # 显示概率信息
+            probability = result_dict['probability']
+            self.probability_label.setText(f"非法概率: {probability:.2%}")
+            self.risk_label.setText(f"风险等级: {result_dict['risk_level']}")
         
-        # 如果是高概率钓鱼网站，显示警告对话框
-        if result_dict['result'] == "钓鱼网站" and probability > 0.7:
-            self.show_alert_dialog(result_dict, probability)
+        # --- 核心修改逻辑结束 ---
     
-    def show_alert_dialog(self, result_dict, probability):
-        """显示警告对话框"""
+    def show_alert_dialog(self, result_dict, risk_warnings):
+        """
+        显示警告对话框
+        参数:
+            result_dict: 结果字典
+            risk_warnings: 包含具体警告字符串的列表 (例如 ['⚠️ URL长度可疑', ...])
+        """
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
-        msg_box.setWindowTitle("⚠️ 严重安全警告")
+        msg_box.setWindowTitle("⚠️ 安全拦截警告")
         
-        msg_box.setText(f"检测到高概率钓鱼网站！")
+        msg_box.setText("安全卫士已拦截此网页访问！")
+        
+        # 将警告列表转换为字符串，去掉图标以便排版（可选）
+        threat_list_str = "\n".join([w for w in risk_warnings])
         
         detailed_text = f"""
-        检测到非法概率高达 {probability:.2%} 的钓鱼网站！
+        检测到以下严重安全威胁：
         
-        URL: {result_dict['url'][:100]}...
+        {threat_list_str}
+        
+        URL: {result_dict['url'][:50]}...
         
         📋 <b>安全建议：</b>
         1. 立即关闭此网页
         2. 不要输入任何个人信息
-        3. 不要点击任何链接
-        4. 不要下载任何文件
-        5. 清理浏览器缓存和cookies
-        6. 运行杀毒软件进行扫描
-        
-        🛡️ <b>防护措施：</b>
-        • 使用安全浏览器
-        • 安装反钓鱼插件
-        • 定期更新安全软件
-        • 谨慎对待可疑链接
+        3. 建议进行全盘杀毒
         """
         
         msg_box.setInformativeText(detailed_text)

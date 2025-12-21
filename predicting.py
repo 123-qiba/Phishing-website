@@ -1,8 +1,10 @@
 import torch
 import numpy as np
+import os
 from train import PhishingCNN1D
 
-def predict_phishing_with_accuracy(features, model_path='best_model.pth'):
+
+def predict_phishing_with_accuracy(features, model_path=None):
     """
     预测网站类型并输出准确率信息
     
@@ -13,6 +15,10 @@ def predict_phishing_with_accuracy(features, model_path='best_model.pth'):
     返回:
         tuple: (预测结果, 预测概率, 置信度)
     """
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if model_path is None:
+        model_path = os.path.join(base_dir, "best_model.pth")
     # 加载模型
     checkpoint = torch.load(model_path, map_location='cpu')
     model = PhishingCNN1D(input_features=30)
