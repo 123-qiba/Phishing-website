@@ -8,6 +8,7 @@
 ## 功能特性
 1.  **历史记录 (History)**
     *   展示由后台拦截模块生成的安全分析报告。
+    *   **新增**：点击“查看详情”可查看完整的透明报告（含威胁描述、风险和建议）。
     *   支持查看拦截时间、URL、威胁等级及处理状态。
     *   支持清空历史记录。
 2.  **黑名单管理 (Blacklist)**
@@ -50,13 +51,17 @@ security_center/
     ```json
     [
       {
-        "time": "2023-10-27 10:23",
+        "interceptId": "BLOCK-XXX...",
+        "timestamp": "2023-10-27T10:23:00.000Z",
         "url": "http://example.com",
-        "threat": "High", // High, Medium, Low
-        "status": "已拦截"
+        "threatName": "网络钓鱼",
+        "threatLevel": "high",
+        "advice": [...],
+        "risks": [...]
       }
     ]
     ```
+    > 注意：数据直接源自模块 5 的 `generateDetailedReport()` 输出。
 
 ### 2. 黑名单 (`userBlacklist`)
 *   **读写权限**：模块 6 (读/写)，模块 1 (读)。

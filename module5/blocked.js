@@ -29,7 +29,7 @@ const CONFIG = {
                 "身份盗用风险"
             ]
         },
-        
+
         malware: {
             title: "已拦截：恶意软件网站",
             type: "恶意软件",
@@ -49,7 +49,7 @@ const CONFIG = {
                 "数据永久丢失"
             ]
         },
-        
+
         fraud: {
             title: "已拦截：欺诈网站",
             type: "欺诈",
@@ -69,7 +69,7 @@ const CONFIG = {
                 "后续骚扰电话"
             ]
         },
-        
+
         suspicious: {
             title: "已拦截：可疑网站",
             type: "可疑内容",
@@ -89,7 +89,7 @@ const CONFIG = {
                 "广告骚扰"
             ]
         },
-        
+
         blacklisted: {
             title: "已拦截：恶意网站",
             type: "黑名单命中",
@@ -110,7 +110,7 @@ const CONFIG = {
             ]
         }
     },
-    
+
     // 威胁等级配置
     severityLevels: {
         critical: { name: "严重威胁", color: "#e74c3c" },
@@ -119,7 +119,7 @@ const CONFIG = {
         low: { name: "低风险", color: "#3498db" },
         suspicious: { name: "可疑", color: "#95a5a6" }
     },
-    
+
     // 默认值
     defaults: {
         url: "https://example-dangerous-site.com",
@@ -132,10 +132,10 @@ const CONFIG = {
 const State = {
     // 拦截信息（来自模块1的URL参数）
     interception: null,
-    
+
     // 当前威胁配置
     threatConfig: null,
-    
+
     // 页面状态
     isInitialized: false,
     isDemoMode: false
@@ -148,26 +148,29 @@ const State = {
  */
 function initBlockedPage() {
     console.log("初始化拦截页面...");
-    
+
     try {
         // 1. 解析URL参数（模块1传递的信息）
         State.interception = parseUrlParameters();
         State.isDemoMode = State.interception.demo === "true";
-        
+
         // 2. 获取威胁配置
         State.threatConfig = getThreatConfig(State.interception.reason);
-        
+
         // 3. 更新页面UI
         updatePageUI();
-        
+
         // 4. 设置事件监听器
         setupEventListeners();
-        
-        // 5. 标记初始化完成
+
+        // 5. 保存拦截记录
+        saveInterceptionRecord();
+
+        // 6. 标记初始化完成
         State.isInitialized = true;
-        
+
         console.log("拦截页面初始化完成", State.interception);
-        
+
     } catch (error) {
         console.error("初始化失败:", error);
         showError("页面初始化失败，请刷新重试");
@@ -180,11 +183,11 @@ function initBlockedPage() {
  */
 function parseUrlParameters() {
     const params = new URLSearchParams(window.location.search);
-    
+
     // 必需参数
     const url = decodeURIComponent(params.get('url') || CONFIG.defaults.url);
     const reason = params.get('reason') || CONFIG.defaults.reason;
-    
+
     // 解析hostname
     let hostname;
     try {
@@ -192,23 +195,23 @@ function parseUrlParameters() {
     } catch {
         hostname = url.split('/')[2] || url;
     }
-    
+
     return {
         // 必需参数
         url: url,
         reason: reason,
         hostname: hostname,
-        
+
         // 可选参数
         threatLevel: params.get('threatLevel') || CONFIG.defaults.threatLevel,
         interceptId: params.get('interceptId') || generateInterceptId(),
         timestamp: params.get('timestamp') || new Date().toISOString(),
-        
+
         // 扩展参数（模块1可添加）
         source: params.get('source'),
         category: params.get('category'),
         matchedPattern: params.get('matchedPattern'),
-        
+
         // 演示模式
         demo: params.get('demo') || "false"
     };
@@ -235,22 +238,22 @@ function getThreatConfig(reason) {
  */
 function updatePageUI() {
     const { interception, threatConfig } = State;
-    
+
     // 更新头部
     updateHeader(threatConfig);
-    
+
     // 更新威胁详情
     updateThreatDetails(interception, threatConfig);
-    
+
     // 更新威胁描述
     updateThreatDescription(threatConfig);
-    
+
     // 更新建议列表
     updateAdviceList(threatConfig);
-    
+
     // 更新对话框内容
     updateDialogContent(interception, threatConfig);
-    
+
     // 更新文档标题
     document.title = `${threatConfig.title} - 网站安全卫士`;
 }
@@ -263,16 +266,16 @@ function updateHeader(threatConfig) {
     const title = document.getElementById('threat-title');
     const icon = document.getElementById('threat-icon');
     const subtitle = document.getElementById('subtitle-text');
-    
+
     // 标题和图标
     title.textContent = threatConfig.title;
     icon.className = threatConfig.icon;
-    
+
     // 副标题
     if (State.isDemoMode) {
         subtitle.textContent = "演示模式 - 安全拦截系统";
     }
-    
+
     // 头部颜色
     header.className = 'warning-header';
     header.classList.add(threatConfig.level);
@@ -286,20 +289,20 @@ function updateThreatDetails(interception, threatConfig) {
     const threatTypeEl = document.getElementById('threat-type');
     threatTypeEl.textContent = threatConfig.type;
     threatTypeEl.className = `threat-badge ${threatConfig.level}`;
-    
+
     // URL信息
     document.getElementById('blocked-url').textContent = interception.url;
     document.getElementById('blocked-hostname').textContent = interception.hostname;
-    
+
     // 威胁等级
     const severityDot = document.getElementById('severity-dot');
     const severityText = document.getElementById('severity-text');
     const level = interception.threatLevel || threatConfig.level;
     const levelConfig = CONFIG.severityLevels[level] || CONFIG.severityLevels.high;
-    
+
     severityDot.className = `severity-dot ${level}`;
     severityText.textContent = levelConfig.name;
-    
+
     // 时间和ID
     const time = new Date(interception.timestamp);
     document.getElementById('intercept-time').textContent = time.toLocaleString('zh-CN');
@@ -319,7 +322,7 @@ function updateThreatDescription(threatConfig) {
 function updateAdviceList(threatConfig) {
     const adviceList = document.getElementById('advice-list');
     adviceList.innerHTML = '';
-    
+
     threatConfig.advice.forEach((advice, index) => {
         const item = document.createElement('div');
         item.className = 'advice-item';
@@ -338,16 +341,16 @@ function updateDialogContent(interception, threatConfig) {
     // 对话框中的URL
     document.getElementById('dialog-url').textContent = interception.url;
     document.getElementById('dialog-threat').textContent = threatConfig.type;
-    
+
     // 威胁等级
     const level = interception.threatLevel || threatConfig.level;
     const levelConfig = CONFIG.severityLevels[level] || CONFIG.severityLevels.high;
     document.getElementById('dialog-level').textContent = levelConfig.name;
-    
+
     // 风险列表
     const riskList = document.getElementById('risk-list');
     riskList.innerHTML = '';
-    
+
     threatConfig.risks.forEach(risk => {
         const li = document.createElement('li');
         li.textContent = risk;
@@ -361,36 +364,36 @@ function updateDialogContent(interception, threatConfig) {
 function setupEventListeners() {
     // 返回安全页面按钮
     document.getElementById('go-back-btn').addEventListener('click', handleGoBack);
-    
+
     // 仍要访问按钮
     document.getElementById('proceed-btn').addEventListener('click', handleProceedClick);
-    
+
     // 对话框相关
     document.getElementById('dialog-close-btn').addEventListener('click', closeRiskDialog);
     document.getElementById('cancel-btn').addEventListener('click', closeRiskDialog);
     document.getElementById('risk-acknowledge').addEventListener('change', handleRiskAcknowledge);
     document.getElementById('confirm-proceed-btn').addEventListener('click', handleConfirmProceed);
-    
+
     // 快速链接
     document.getElementById('learn-more-link').addEventListener('click', handleLearnMore);
     document.getElementById('report-link').addEventListener('click', handleReport);
     document.getElementById('more-info-link').addEventListener('click', handleMoreInfo);
-    
+
     // 页脚链接
     document.getElementById('privacy-link').addEventListener('click', handlePrivacy);
     document.getElementById('help-link').addEventListener('click', handleHelp);
     document.getElementById('feedback-link').addEventListener('click', handleFeedback);
-    
+
     // 下拉菜单项
     document.getElementById('view-details-item').addEventListener('click', handleViewDetails);
     document.getElementById('whitelist-item').addEventListener('click', handleWhitelist);
     document.getElementById('security-center-item').addEventListener('click', handleSecurityCenter);
     document.getElementById('refresh-item').addEventListener('click', handleRefresh);
     document.getElementById('copy-url-item').addEventListener('click', handleCopyUrl);
-    
+
     // 关闭下拉菜单（点击页面其他地方）
     document.addEventListener('click', closeDropdownMenu);
-    
+
     // 键盘快捷键
     document.addEventListener('keydown', handleKeyboardShortcuts);
 }
@@ -422,12 +425,12 @@ function handleProceedClick() {
 function showRiskDialog() {
     const dialog = document.getElementById('risk-dialog');
     dialog.style.display = 'flex';
-    
+
     // 重置确认复选框
     document.getElementById('risk-acknowledge').checked = false;
     document.getElementById('dont-show-again').checked = false;
     document.getElementById('confirm-proceed-btn').disabled = true;
-    
+
     // 阻止背景滚动
     document.body.style.overflow = 'hidden';
 }
@@ -438,7 +441,7 @@ function showRiskDialog() {
 function closeRiskDialog() {
     const dialog = document.getElementById('risk-dialog');
     dialog.style.display = 'none';
-    
+
     // 恢复背景滚动
     document.body.style.overflow = '';
 }
@@ -456,15 +459,15 @@ function handleRiskAcknowledge(event) {
  */
 function handleConfirmProceed() {
     if (!State.interception) return;
-    
+
     const dontShowAgain = document.getElementById('dont-show-again').checked;
-    
+
     // 记录用户选择（发送给模块6）
     sendUserAction('proceed_anyway', {
         dontShowAgain: dontShowAgain,
         acknowledged: true
     });
-    
+
     if (State.isDemoMode) {
         // 演示模式：显示提示
         alert(`演示模式：在实际扩展中，将重定向到：\n\n${State.interception.url}`);
@@ -472,7 +475,7 @@ function handleConfirmProceed() {
     } else {
         // 实际扩展中：重定向到被拦截的URL
         // window.location.href = State.interception.url;
-        
+
         // 临时：在演示中不实际重定向
         alert(`在实际扩展中，将重定向到被拦截的URL。\n\nURL: ${State.interception.url}`);
         closeRiskDialog();
@@ -484,7 +487,7 @@ function handleConfirmProceed() {
  */
 function handleLearnMore(event) {
     event.preventDefault();
-    
+
     const { threatConfig } = State;
     const message = `
 ${threatConfig.type} - 详细说明：
@@ -500,7 +503,7 @@ ${threatConfig.description}
 防护建议：
 ${threatConfig.advice.map((advice, i) => `${i + 1}. ${advice}`).join('\n')}
     `;
-    
+
     alert(message);
 }
 
@@ -509,11 +512,11 @@ ${threatConfig.advice.map((advice, i) => `${i + 1}. ${advice}`).join('\n')}
  */
 function handleReport(event) {
     event.preventDefault();
-    
+
     if (!State.interception) return;
-    
+
     const comment = prompt('请说明为什么您认为这是误报：\n（这将帮助改进我们的安全系统）', '');
-    
+
     if (comment !== null) {
         sendFalseReport(comment);
         alert('感谢您的反馈！误报报告已提交。');
@@ -526,11 +529,11 @@ function handleReport(event) {
 function handleMoreInfo(event) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const menu = document.getElementById('options-menu');
     const link = event.currentTarget;
     const rect = link.getBoundingClientRect();
-    
+
     // 定位菜单
     menu.style.left = `${rect.left}px`;
     menu.style.top = `${rect.bottom + 5}px`;
@@ -567,10 +570,10 @@ function handleFeedback(event) {
 function handleViewDetails(event) {
     event.preventDefault();
     closeDropdownMenu();
-    
+
     const { interception, threatConfig } = State;
     const report = generateDetailedReport();
-    
+
     // 显示报告
     const reportText = `
 === 详细安全报告 ===
@@ -592,7 +595,7 @@ function handleViewDetails(event) {
 • 威胁配置: ${threatConfig.type}
 • 建议操作: ${threatConfig.advice.length} 条安全建议
     `;
-    
+
     alert(reportText);
 }
 
@@ -602,11 +605,11 @@ function handleViewDetails(event) {
 function handleWhitelist(event) {
     event.preventDefault();
     closeDropdownMenu();
-    
+
     if (!State.interception) return;
-    
+
     const confirmed = confirm(`您确定要将以下网站添加到白名单吗？\n\n${State.interception.hostname}\n\n添加到白名单后，将不再拦截此网站。`);
-    
+
     if (confirmed) {
         sendWhitelistRequest();
         alert('网站已添加到白名单请求列表。');
@@ -628,10 +631,10 @@ function handleSecurityCenter(event) {
 function handleRefresh(event) {
     event.preventDefault();
     closeDropdownMenu();
-    
+
     if (State.isDemoMode) {
         alert('演示模式：重新检测将使用新的模拟数据。');
-        
+
         // 模拟重新检测
         const reasons = Object.keys(CONFIG.threatTypes);
         const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
@@ -649,9 +652,9 @@ function handleRefresh(event) {
 function handleCopyUrl(event) {
     event.preventDefault();
     closeDropdownMenu();
-    
+
     if (!State.interception) return;
-    
+
     navigator.clipboard.writeText(State.interception.url)
         .then(() => {
             alert('网址已复制到剪贴板');
@@ -687,17 +690,17 @@ function handleKeyboardShortcuts(event) {
         }
         closeDropdownMenu();
     }
-    
+
     // Ctrl+Enter: 确认继续访问（在对话框中）
     if (event.ctrlKey && event.key === 'Enter') {
         const dialog = document.getElementById('risk-dialog');
         const confirmBtn = document.getElementById('confirm-proceed-btn');
-        
+
         if (dialog.style.display === 'flex' && !confirmBtn.disabled) {
             handleConfirmProceed();
         }
     }
-    
+
     // Alt+B: 返回安全页面
     if (event.altKey && event.key === 'b') {
         handleGoBack();
@@ -717,15 +720,15 @@ function sendUserAction(action, data = {}) {
         data: data,
         demo: State.isDemoMode
     };
-    
+
     console.log('用户操作记录:', log);
-    
+
     // 发送给模块6（通过postMessage）
     window.postMessage({
         type: 'module5_user_action',
         data: log
     }, '*');
-    
+
     // 如果使用chrome.storage，也可以存储
     if (typeof chrome !== 'undefined' && chrome.storage) {
         chrome.storage.local.get(['userActions'], result => {
@@ -747,9 +750,9 @@ function sendFalseReport(comment) {
         userComment: comment,
         threatType: State.interception?.reason
     };
-    
+
     console.log('误报报告:', report);
-    
+
     // 发送给模块6
     window.postMessage({
         type: 'module5_false_report',
@@ -767,9 +770,9 @@ function sendWhitelistRequest() {
         requestedAt: new Date().toISOString(),
         reason: '用户手动添加'
     };
-    
+
     console.log('白名单请求:', request);
-    
+
     // 发送给模块6
     window.postMessage({
         type: 'module5_whitelist_request',
@@ -784,7 +787,7 @@ function sendWhitelistRequest() {
  */
 function generateDetailedReport() {
     const { interception, threatConfig } = State;
-    
+
     return {
         interceptId: interception.interceptId,
         timestamp: interception.timestamp,
@@ -799,6 +802,42 @@ function generateDetailedReport() {
         source: interception.source || 'local',
         demo: State.isDemoMode
     };
+}
+
+/**
+ * 保存拦截记录到本地存储
+ */
+function saveInterceptionRecord() {
+    if (State.isDemoMode) {
+        console.log('演示模式：不保存拦截记录');
+        return;
+    }
+
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+        console.warn('Chrome storage API 不可用，无法保存记录');
+        return;
+    }
+
+    const report = generateDetailedReport();
+    report.status = 'blocked'; // 初始状态为已拦截
+
+    chrome.storage.local.get(['securityHistory'], (result) => {
+        const history = result.securityHistory || [];
+
+        // 避免重复添加（检查 ID）
+        const exists = history.some(item => item.interceptId === report.interceptId);
+        if (!exists) {
+            // 添加到头部
+            history.unshift(report);
+
+            // 限制存储数量（例如最近 100 条）
+            const newHistory = history.slice(0, 100);
+
+            chrome.storage.local.set({ securityHistory: newHistory }, () => {
+                console.log('拦截记录已保存:', report);
+            });
+        }
+    });
 }
 
 /**
@@ -819,7 +858,7 @@ function showError(message) {
             </button>
         </div>
     `;
-    
+
     container.insertBefore(errorDiv, container.firstChild);
 }
 
@@ -831,33 +870,33 @@ document.addEventListener('DOMContentLoaded', initBlockedPage);
 // 提供公共API供其他模块调用
 window.BlockedPage = {
     // 更新拦截信息（模块1调用）
-    updateInterception: function(data) {
+    updateInterception: function (data) {
         if (!data || !data.url) {
             console.error('无效的拦截数据');
             return false;
         }
-        
+
         State.interception = { ...State.interception, ...data };
         State.threatConfig = getThreatConfig(State.interception.reason);
-        
+
         if (State.isInitialized) {
             updatePageUI();
         }
-        
+
         return true;
     },
-    
+
     // 获取当前状态
-    getState: function() {
+    getState: function () {
         return {
             interception: State.interception,
             threatConfig: State.threatConfig,
             isDemoMode: State.isDemoMode
         };
     },
-    
+
     // 获取配置
-    getConfig: function() {
+    getConfig: function () {
         return CONFIG;
     }
 };

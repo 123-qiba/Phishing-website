@@ -85,6 +85,22 @@ function initHistory() {
             });
         });
     }
+
+    // Modal close logic for report modal
+    const reportModal = document.getElementById('report-modal');
+    const reportCloseBtn = document.getElementById('report-close-btn');
+    if (reportModal && reportCloseBtn) {
+        reportCloseBtn.addEventListener('click', () => {
+            reportModal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        reportModal.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                reportModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
 }
 
 function loadHistory() {
@@ -112,26 +128,128 @@ function renderHistoryTable(data) {
     const historyList = document.getElementById('history-list');
     historyList.innerHTML = '';
 
+    // Update table header to match new columns
+    const thead = document.querySelector('.data-table thead tr');
+    if (thead) {
+        thead.innerHTML = `
+            <th>时间</th>
+            <th>拦截ID</th>
+            <th>威胁类型</th>
+            <th>URL</th>
+            <th>操作</th>
+        `;
+    }
+
     if (!data || data.length === 0) {
-        historyList.innerHTML = '<tr class="empty-state"><td colspan="4">暂无记录</td></tr>';
+        historyList.innerHTML = '<tr class="empty-state"><td colspan="5">暂无记录</td></tr>';
         return;
     }
 
-    data.forEach(item => {
+    data.forEach((item, index) => {
         const tr = document.createElement('tr');
-        let threatColor = '#9ca3af';
-        if (item.threat === 'High' || item.threat === '高') threatColor = '#ef4444';
-        if (item.threat === 'Medium' || item.threat === '中') threatColor = '#f59e0b';
+
+        // Handle both old format (time, url, threat) and new format (timestamp, url, threatType...)
+        // New format: timestamp (ISO), threatType (key), threatLevel (level)
+
+        let displayTime = item.time || new Date(item.timestamp).toLocaleString('zh-CN');
+        let displayUrl = item.url;
+        let displayId = item.interceptId || '--';
+        let displayType = item.threatName || item.threat || '未知威胁';
+        let displayLevel = item.threatLevel || 'high'; // critical, high, medium, low
+
+        // Map level to color
+        let levelClass = 'high';
+        if (displayLevel === 'critical') levelClass = 'critical';
+        if (displayLevel === 'medium') levelClass = 'medium';
+        if (displayLevel === 'low') levelClass = 'low';
+
+        // Inline styles for quick prototype, ideally should be classes
+        const colorMap = {
+            'critical': '#e74c3c',
+            'high': '#f39c12',
+            'medium': '#f1c40f',
+            'low': '#3498db'
+        };
+        const color = colorMap[displayLevel] || colorMap['high'];
 
         tr.innerHTML = `
-            <td style="color: var(--text-muted);">${item.time}</td>
-            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.url}">${item.url}</td>
-            <td style="color: ${threatColor}; font-weight: 500;">${item.threat}</td>
-            <td><span class="badge">${item.status}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.9em;">${displayTime}</td>
+            <td style="font-family: monospace; color: var(--text-muted);">${displayId}</td>
+            <td><span style="color: ${color}; font-weight: 600;">${displayType}</span></td>
+            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${displayUrl}">
+                ${displayUrl}
+            </td>
+            <td>
+                <button class="btn btn-secondary btn-sm view-details-btn" data-index="${index}">
+                    查看详情
+                </button>
+            </td>
         `;
         historyList.appendChild(tr);
     });
+
+    // Add event listeners to buttons
+    document.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = e.target.dataset.index;
+            const report = data[index];
+            showHistoryDetails(report);
+        });
+    });
 }
+
+function showHistoryDetails(report) {
+    const modal = document.getElementById('report-modal');
+    if (!modal) return;
+
+    // Populate Data
+    document.getElementById('report-title').textContent = report.threatName || '安全拦截报告';
+    document.getElementById('report-time').textContent = report.time || new Date(report.timestamp).toLocaleString('zh-CN');
+
+    // Description: support both old and new data
+    // New data from generateDetailedReport() doesn't have 'description' field directly in the top object, 
+    // it was in threatConfig. But we saved the REPORT from generateDetailedReport().
+    // Let's check blocked.js generateDetailedReport() again.
+    // It returns: { ..., advice: ..., risks: ..., ... }
+    // It MISSES 'description' text! The description was in `threatConfig.description`.
+    // blocked.js only put advice and risks into the report object.
+    // I should probably update `blocked.js` to include description too, or just use what we have.
+    // For now, let's use a default or try to map it.
+    // Or I can update `blocked.js` in a quick follow-up.
+    // Let's stick to what we have.
+    document.getElementById('report-description').textContent = '点击下方了解更多查看完整威胁定义的描述。';
+
+
+    document.getElementById('report-id').textContent = report.interceptId || 'N/A';
+    document.getElementById('report-url').textContent = report.url;
+
+    // Lists
+    const riskList = document.getElementById('report-risks');
+    riskList.innerHTML = '';
+    if (report.risks && Array.isArray(report.risks)) {
+        report.risks.forEach(risk => {
+            riskList.innerHTML += `<li>${risk}</li>`;
+        });
+    } else {
+        riskList.innerHTML = '<li>无详细风险信息</li>';
+    }
+
+    const adviceList = document.getElementById('report-advice');
+    adviceList.innerHTML = '';
+    if (report.advice && Array.isArray(report.advice)) {
+        report.advice.forEach(advice => {
+            adviceList.innerHTML += `<li>${advice}</li>`;
+        });
+    } else {
+        adviceList.innerHTML = '<li>无详细建议</li>';
+    }
+
+    // Show Modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+
 
 // --- Blacklist Module ---
 function initBlacklist() {

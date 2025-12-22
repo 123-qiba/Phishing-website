@@ -142,6 +142,12 @@ blocked.html?url=https://phishing-site.com&reason=phishing&threatLevel=critical&
 
 
 
+### 数据持久化（新增）
+拦截页面会自动将拦截记录保存到 `chrome.storage.local` 的 `securityHistory` 字段中，供模块 6 安全中心读取。
+- **存储时机**：页面初始化完成后。
+- **存储格式**：完整的透明报告对象。
+- **存储限制**：最近 100 条记录。
+
 ## **模块1同学需要做的全部工作：**
 
 ```javascript
