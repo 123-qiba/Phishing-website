@@ -387,54 +387,54 @@ function updateServerBlacklist(list) {
 // --- Knowledge Base Module ---
 const knowledgeDB = {
     'threat-url': {
-        title: '威胁：恶意链接传播',
+        title: 'URL 结构与伪造欺诈',
         content: `
-            <p>攻击者通过垃圾邮件、短信或社交媒体传播精心构造的钓鱼链接。这些链接通常指向已知的恶意服务器或刚被攻破的合法网站。</p>
-            <h3>解决方案 (模块 1：智能拦截)</h3>
-            <p>本项目的核心后端模块通过以下方式解决此威胁：</p>
+            <p>攻击者通过操纵 URL 字符串来混淆视听，诱导用户认为自己访问的是合法网站。</p>
+            <h3>检测特征 (模块 1：URL 规则)</h3>
             <ul>
-                <li><strong>实时请求拦截</strong>：利用 <code>webRequest</code> API 在浏览器发出网络请求毫秒级前进行拦截。</li>
-                <li><strong>本地黑名单匹配</strong>：内置并定期更新高危 URL 数据库，瞬间识别已知威胁。</li>
-                <li><strong>正则模式识别</strong>：识别典型的钓鱼 URL 结构（如过多的重定向参数）。</li>
+                <li><strong>IP 地址直连</strong>：合法网站极少使用裸 IP (如 <code>http://192.168.x.x</code>)。</li>
+                <li><strong>短链接混淆</strong>：使用 bit.ly 等服务隐藏真实目的地址。</li>
+                <li><strong>特殊符号欺骗</strong>：利用 <code>@</code> 符号 (浏览器会忽略其前面的内容) 或双斜杠 <code>//</code> 进行重定向跳转。</li>
+                <li><strong>形似域名</strong>：使用连字符 <code>-</code> (如 <code>paypal-secure.com</code>) 模仿知名品牌。</li>
             </ul>
         `
     },
-    'threat-reputation': {
-        title: '威胁：网站信誉风险',
+    'threat-domain': {
+        title: '域名信誉与生命周期',
         content: `
-            <p>许多新注册的钓鱼网站尚未被列入黑名单，难以被传统手段拦截。它们往往缺乏历史信誉积累，或使用了廉价、匿名的托管服务。</p>
-            <h3>解决方案 (模块 2：安全评分系统)</h3>
-            <p>我们建立了多维度的实时评分模型来评估“未知”网站的风险：</p>
+            <p>钓鱼网站通常生命周期极短（“日抛型”），且缺乏完整的注册信息。</p>
+            <h3>检测特征 (模块 2：信誉分析)</h3>
             <ul>
-                <li><strong>多因子评估</strong>：综合考量 HTTPS 证书等级、域名注册时长、Alexa 排名等数据。</li>
-                <li><strong>外部资源分析</strong>：检测页面是否大量引用了来路不明的第三方脚本或框架。</li>
-                <li><strong>动态打分</strong>：最终输出 A-F 的安全等级，让未知的威胁无所遁形。</li>
+                <li><strong>注册时间过短</strong>：域名注册少于 6 个月或刚刚注册。</li>
+                <li><strong>WHOIS 异常</strong>：隐藏注册人信息或查询失败。</li>
+                <li><strong>无 DNS 记录</strong>：域名对应的 A 记录为空或解析异常。</li>
+                <li><strong>HTTPS 滥用</strong>：即使有 HTTPS 锁图标，如果证书是免费/短期的，依然可能不安全。</li>
             </ul>
         `
     },
-    'threat-visual': {
-        title: '威胁：视觉欺诈与页面伪造',
+    'threat-content': {
+        title: '页面内容与恶意行为',
         content: `
-            <p>高级攻击者会完整克隆银行或支付平台的登录页面（包括 Logo、布局）。由于 URL 可能使用了形似字符，用户极易被视觉假象欺骗。</p>
-            <h3>解决方案 (模块 3：DOM 内容分析)</h3>
-            <p>通过注入的内容脚本 (Content Script) 深入网页内部进行“体检”：</p>
+            <p>即使 URL 看起来正常，页面内部的代码可能包含窃取数据的逻辑或恶意脚本。</p>
+            <h3>检测特征 (模块 3：DOM 分析)</h3>
             <ul>
-                <li><strong>表单特征识别</strong>：识别非官方域名下的“用户名+密码”输入框组合。</li>
-                <li><strong>UI 结构比对</strong>：检测页面 DOM 结构是否与知名网站高度相似但 URL 不匹配。</li>
-                <li><strong>隐藏元素检测</strong>：发现用于逃避扫描的隐藏关键词或覆盖层。</li>
+                <li><strong>异常表单 (SFH)</strong>：登录表单的提交地址为空 (<code>about:blank</code>) 或指向第三方域名。</li>
+                <li><strong>隐蔽框架 (Iframe)</strong>：使用肉眼不可见的 iframe 覆盖层劫持点击。</li>
+                <li><strong>状态栏伪造</strong>：利用 <code>onmouseover</code> 修改浏览器状态栏显示的 URL，掩盖真实链接。</li>
+                <li><strong>弹窗滥用</strong>：利用 <code>window.open</code> 或大量弹窗干扰用户操作。</li>
             </ul>
         `
     },
-    'threat-https': {
-        title: '威胁：虚假安全陷阱',
+    'threat-ai': {
+        title: 'AI 深度学习综合研判',
         content: `
-            <p>超过 80% 的现代钓鱼网站使用 HTTPS 协议，浏览器地址栏的“安全锁”图标常让用户误以为网站是绝对安全的。</p>
-            <h3>解决方案 (模块 5：透明化报告)</h3>
-            <p>我们致力于打破“HTTPS = 安全”的迷思：</p>
+            <p>针对“未知威胁”，系统利用训练好的深度神经网路模型进行概率预测。</p>
+            <h3>检测机制 (模块 4：智能核心)</h3>
             <ul>
-                <li><strong>深度证书校验</strong>：不仅检查加密，还验证证书颁发机构 (CA) 的信誉度。</li>
-                <li><strong>混合内容警告</strong>：当HTTPS页面加载不安全的HTTP资源时发出警告。</li>
-                <li><strong>教育式拦截</strong>：在拦截页面清晰告知用户“为何被拦截”，提升用户的安全认知。</li>
+                <li><strong>1D-CNN 模型</strong>：后端部署的一维卷积神经网络。</li>
+                <li><strong>30 维特征向量</strong>：将上述所有 URL、域名、内容特征转化为数值向量输入模型。</li>
+                <li><strong>概率评分</strong>：模型输出 0.0~1.0 的概率值。超过 0.5 即视为钓鱼，超过 0.8 为严重威胁。</li>
+                <li><strong>零容忍拦截</strong>：结合前台策略，只要模型判定为中高风险，立即切断访问。</li>
             </ul>
         `
     }

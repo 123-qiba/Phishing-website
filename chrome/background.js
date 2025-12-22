@@ -106,7 +106,8 @@ async function checkAndMaybeBlock(tabId, url) {
     chrome.action.setBadgeBackgroundColor({ color: "#e74c3c", tabId: tabId });
 
     // 需要拦截：跳转到拦截页面
-    if (riskLevel === "critical" || riskLevel === "high") {
+    // 用户要求：只要有警告就拦截，同时如果风险等级是 medium/high/critical 也拦截
+    if (hasWarning || riskLevel === "critical" || riskLevel === "high" || riskLevel === "medium") {
       const blockedPageUrl =
         chrome.runtime.getURL("blocked/blocked.html") +
         "?url=" + encodeURIComponent(url) +

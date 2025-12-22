@@ -77,45 +77,47 @@ function renderGrade(data) {
   let badgeText = "Unknown";
 
   // Use riskLevel if available (preferred)
+  // Use riskLevel if available (preferred)
   if (riskLevel) {
     switch (riskLevel.toLowerCase()) {
       case 'critical':
-        text = "严重";
+        text = "D";
         color = "#c0392b";
         badgeText = "CRITICAL";
         break;
       case 'high':
-        text = "高危";
+        text = "C";
         color = "#e74c3c";
         badgeText = "HIGH";
         break;
       case 'medium':
-        text = "中风险";
+        text = "B";
         color = "#f1c40f";
         badgeText = "MEDIUM";
         break;
       case 'low':
       case 'safe':
-        text = "安全";
+        text = "A";
         color = "#2ecc71";
         badgeText = "SAFE";
         break;
       default:
-        text = "未知";
+        text = "?";
     }
   } else {
     // Fallback to score logic if riskLevel missing
     const score = Number(scoreRaw || 0);
-    if (score >= 90) { text = "安全"; color = "#2ecc71"; badgeText = "SAFE"; }
-    else if (score >= 75) { text = "低风险"; color = "#3498db"; badgeText = "LOW"; }
-    else if (score >= 60) { text = "中风险"; color = "#f1c40f"; badgeText = "MEDIUM"; }
-    else { text = "高危"; color = "#e74c3c"; badgeText = "HIGH"; }
+    if (score >= 90) { text = "A"; color = "#2ecc71"; badgeText = "SAFE"; }
+    else if (score >= 75) { text = "B"; color = "#3498db"; badgeText = "LOW"; }
+    else if (score >= 60) { text = "C"; color = "#f1c40f"; badgeText = "MEDIUM"; }
+    else { text = "D"; color = "#e74c3c"; badgeText = "HIGH"; }
   }
 
   if (gradeEl) {
     gradeEl.textContent = text;
     gradeEl.style.color = color;
-    gradeEl.style.fontSize = "32px"; // Adjust for Chinese text width
+    gradeEl.style.fontSize = "48px"; // Larger font for Grade Letter
+    gradeEl.style.fontWeight = "bold";
   }
 
   // 完全隐藏具体的 Score 显示
