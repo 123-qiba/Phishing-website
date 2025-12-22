@@ -639,7 +639,19 @@ def _load_blacklist():
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             d = line.strip().lower()
-            if d and not d.startswith("#"):
+            if not d or d.startswith("#"):
+                continue
+            
+            # 自动清理：如果用户输入的是完整URL，提取其域名
+            if "://" in d:
+                try:
+                    d = urlparse(d).netloc.lower()
+                except:
+                    pass
+            # 移除可能存在的路径或斜杠
+            d = d.split('/')[0].split(':')[0]
+            
+            if d:
                 s.add(d)
     return s
 
@@ -648,7 +660,14 @@ def feat_Statistical_report(url):
     bl = _load_blacklist()
     if not bl:
         return -1
-    return 1 if domain in bl else -1
+    
+    # 检查: 全等 或 子域名匹配 (e.g. www.baidu.com endswith baidu.com)
+    # 注意: 加一个点 "." 防止 matching "scambaidu.com" with "baidu.com"
+    for b in bl:
+        if domain == b or domain.endswith("." + b):
+            return 1
+            
+    return -1
 
 
 # ---------------------------------------------------

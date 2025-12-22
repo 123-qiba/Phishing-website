@@ -42,7 +42,7 @@ function loadData() {
       // 若正在加载，则 1 秒后重试
       setTimeout(loadData, 1000);
     } else {
-      renderGrade(data.score);
+      renderGrade(data);
       renderStats(data);
       renderChart(data);
     }
@@ -60,34 +60,73 @@ function renderLoading() {
   if (badgeEl) badgeEl.textContent = "Wait";
 }
 
-function renderGrade(scoreRaw) {
+function renderGrade(data) {
+  const { score: scoreRaw, riskLevel } = data;
+
   if (scoreRaw === '-' || scoreRaw === undefined) {
     renderLoading();
     return;
   }
-  const score = Number(scoreRaw || 0);
 
   const gradeEl = document.getElementById("grade");
   const scoreEl = document.getElementById("score");
   const badgeEl = document.getElementById("badge");
 
-  let grade = "F", label = "高风险";
-  let color = "#e74c3c";
+  let text = "未知";
+  let color = "#95a5a6";
+  let badgeText = "Unknown";
 
-  if (score >= 90) { grade = "A"; label = "非常安全"; color = "#2ecc71"; }
-  else if (score >= 75) { grade = "B"; label = "较安全"; color = "#3498db"; }
-  else if (score >= 60) { grade = "C"; label = "一般"; color = "#f1c40f"; }
-  else if (score >= 40) { grade = "D"; label = "偏风险"; color = "#e67e22"; }
+  // Use riskLevel if available (preferred)
+  if (riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'critical':
+        text = "严重";
+        color = "#c0392b";
+        badgeText = "CRITICAL";
+        break;
+      case 'high':
+        text = "高危";
+        color = "#e74c3c";
+        badgeText = "HIGH";
+        break;
+      case 'medium':
+        text = "中风险";
+        color = "#f1c40f";
+        badgeText = "MEDIUM";
+        break;
+      case 'low':
+      case 'safe':
+        text = "安全";
+        color = "#2ecc71";
+        badgeText = "SAFE";
+        break;
+      default:
+        text = "未知";
+    }
+  } else {
+    // Fallback to score logic if riskLevel missing
+    const score = Number(scoreRaw || 0);
+    if (score >= 90) { text = "安全"; color = "#2ecc71"; badgeText = "SAFE"; }
+    else if (score >= 75) { text = "低风险"; color = "#3498db"; badgeText = "LOW"; }
+    else if (score >= 60) { text = "中风险"; color = "#f1c40f"; badgeText = "MEDIUM"; }
+    else { text = "高危"; color = "#e74c3c"; badgeText = "HIGH"; }
+  }
 
   if (gradeEl) {
-    gradeEl.textContent = grade;
+    gradeEl.textContent = text;
     gradeEl.style.color = color;
+    gradeEl.style.fontSize = "32px"; // Adjust for Chinese text width
   }
-  if (scoreEl) scoreEl.textContent = `Score: ${score}`;
+
+  // 完全隐藏具体的 Score 显示
+  if (scoreEl) {
+    scoreEl.style.display = "none";
+  }
+
   if (badgeEl) {
-    badgeEl.textContent = label;
+    badgeEl.textContent = badgeText;
     badgeEl.style.backgroundColor = color;
-    badgeEl.style.color = "white"; // Ensure text is readable
+    badgeEl.style.color = "white";
   }
 }
 

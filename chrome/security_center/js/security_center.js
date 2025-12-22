@@ -284,8 +284,9 @@ function initBlacklist() {
     });
 }
 
+const SERVER_URL = 'http://127.0.0.1:5000/blacklist';
+
 function loadBlacklist() {
-    const SERVER_URL = 'http://localhost:8000/blacklist';
     fetch(SERVER_URL)
         .then(response => response.json())
         .then(list => {
@@ -296,7 +297,7 @@ function loadBlacklist() {
         })
         .catch(error => {
             console.error('Error loading blacklist from server:', error);
-            // Fallback to local storage if server is down
+            // Fallback to local storage if API fails (UI only)
             chrome.storage.local.get(['userBlacklist'], (result) => {
                 const list = result.userBlacklist || [];
                 renderBlacklist(list);
@@ -335,8 +336,6 @@ function renderBlacklist(list) {
 }
 
 function addToBlacklist(url) {
-    const SERVER_URL = 'http://localhost:8000/blacklist';
-
     // First fetch latest to ensure we don't overwrite
     fetch(SERVER_URL)
         .then(res => res.json())
@@ -344,17 +343,17 @@ function addToBlacklist(url) {
             if (!list.includes(url)) {
                 list.push(url);
                 updateServerBlacklist(list);
+            } else {
+                alert('该域名已在黑名单中');
             }
         })
         .catch(err => {
-            console.error('Server error, falling back to local storage', err);
-            // Fallback logic could be added here
+            console.error('Server error', err);
+            alert("无法连接到后端服务器，请确认 server.py 是否运行");
         });
 }
 
 function removeFromBlacklist(url) {
-    const SERVER_URL = 'http://localhost:8000/blacklist';
-
     fetch(SERVER_URL)
         .then(res => res.json())
         .then(list => {
@@ -367,7 +366,6 @@ function removeFromBlacklist(url) {
 }
 
 function updateServerBlacklist(list) {
-    const SERVER_URL = 'http://localhost:8000/blacklist';
     fetch(SERVER_URL, {
         method: 'POST',
         headers: {
@@ -382,6 +380,7 @@ function updateServerBlacklist(list) {
         })
         .catch(err => {
             console.error('Failed to update server', err);
+            alert("更新失败");
         });
 }
 

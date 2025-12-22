@@ -29,18 +29,30 @@ async function checkAndMaybeBlock(tabId, url) {
     const probability = data.probability !== undefined ? data.probability : 0;
     const score = Math.round((1 - probability) * 100);
 
-    // 2. 统计 Module 1 (规则/黑名单) 和 Module 3 (DOM 分析) 的结果
+    // 2. 统计 Module 1 (规则/黑名单) 和 Module 3 (DOM/内容) 的结果
     // 根据 server.py 的返回格式区分
-    const domRisks = warnings.filter(w => w.includes("[内容]") || w.includes("DOM") || w.includes("Iframe") || w.includes("Popup")).length;
 
-    // 剩下的都算作 Module 1 (黑名单/规则) 命中
-    // 排除掉 "✅" 开头的安全提示
-    const blacklistHits = warnings.filter(w => !w.includes("[内容]") && !w.includes("✅") && w.includes("⚠️")).length;
+    // A. 真正的黑名单命中 
+    const isBlacklisted = warnings.some(w => w.includes("⚠️ 网站在黑名单中"));
+    const blacklistHits = isBlacklisted ? 1 : 0;
 
-    // 目前没有专门统计请求风险，若有可以在 server.py 添加特定标记
-    const badRequests = 0;
+    // B. DOM/内容风险 (Module 3)
+    // 根据 server.py 的消息关键字: "SFH", "Email", "MouseOver", "Popup", "Iframe", "[内容]"
+    const domRiskKeywords = ["SFH", "Email", "MouseOver", "Popup", "Iframe", "[内容]", "DOM"];
+    const domRisks = warnings.filter(w => domRiskKeywords.some(k => w.includes(k))).length;
 
-    // 只要有以“⚠️”开头的警告，就认为需要拦截
+    // C. 危险请求/URL规则 (Module 1 其他规则)
+    // 排除掉 "✅" 安全提示、黑名单命中和 DOM 风险，剩下的归为危险请求/特征异常
+    const badRequests = warnings.filter(w => {
+      // 排除安全提示
+      if (w.includes("✅")) return false;
+      // 排除黑名单特定提示
+      if (w.includes("⚠️ 网站在黑名单中")) return false;
+      // 排除 DOM 风险
+      if (domRiskKeywords.some(k => w.includes(k))) return false;
+      // 必须是警告
+      return w.includes("⚠️");
+    }).length;
     const hasWarning = warnings.some(
       (w) => typeof w === "string" && w.startsWith("⚠️")
     );

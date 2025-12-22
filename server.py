@@ -2,8 +2,9 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from judge_port import extract_features
+from judge_port import extract_features, _load_blacklist
 from predicting import predict_phishing_with_accuracy
+import os
 
 app = Flask(__name__)
 CORS(app)  # 允许被 Chrome 扩展跨域访问
@@ -22,6 +23,11 @@ def get_risk_level(probability: float) -> str:
 def generate_warnings(features):
     """按 tol_final.py 同样规则生成安全警告列表"""
     warnings = []
+
+    # 1. 优先检查黑名单 (Module 1 / Feature 29)
+    # judge_port.py: return 1 if domain in bl else -1
+    if 29 < len(features) and features[29] == 1:
+        warnings.append("⚠️ 网站在黑名单中")
 
     # 高风险特征
     high_risk_indices = [0, 2, 3, 4, 5, 17, 24]
@@ -122,7 +128,45 @@ def check_url():
         })
     except Exception as e:
         print("检测发生错误:", e)
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/blacklist", methods=["GET", "POST"])
+def manage_blacklist():
+    # 黑名单文件路径 (与 judge_port.py 中的逻辑保持一致)
+    txt_path = os.path.join(os.path.dirname(__file__), "blacklist.txt")
+    
+    if request.method == "GET":
+        try:
+            lines = []
+            if os.path.exists(txt_path):
+                with open(txt_path, "r", encoding="utf-8") as f:
+                    lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            return jsonify(lines)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    elif request.method == "POST":
+        try:
+            new_list = request.json
+            if not isinstance(new_list, list):
+                return jsonify({"error": "Invalid format, expected list"}), 400
+            
+            # 去重并写入
+            unique_list = sorted(list(set(new_list)))
+            with open(txt_path, "w", encoding="utf-8") as f:
+                for item in unique_list:
+                    f.write(item + "\n")
+            
+            # 关键：清除 LRU 缓存，使 judge_port.py 重新读取文件
+            _load_blacklist.cache_clear()
+            print("黑名单已更新，缓存已清除")
+            
+            return jsonify({"status": "ok", "count": len(unique_list)})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
