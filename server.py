@@ -55,6 +55,22 @@ def generate_warnings(features):
         if idx < len(features) and features[idx] == 1:
             warnings.append(f"⚠️ {msg}")
 
+    # 模块 3: DOM/内容欺诈风险 (Indices correspond to judge.py feature list)
+    # 9: Favicon, 12: Request_URL, 13: URL_of_Anchor, 14: Links_in_tags, 15: SFH, 16: Submitting_to_email
+    # 19: on_mouseover, 20: RightClick, 21: popUpWidnow, 22: Iframe
+    
+    dom_risk_indices = [15, 16, 19, 21, 22]
+    dom_risk_messages = [
+        "SFH: 异常表单提交地址",
+        "Email: 网页尝试发送邮件",
+        "MouseOver: 状态栏伪造",
+        "Popup: 存在弹出窗口",
+        "Iframe: 存在隐蔽框架"
+    ]
+    for idx, msg in zip(dom_risk_indices, dom_risk_messages):
+        if idx < len(features) and features[idx] == 1:
+            warnings.append(f"⚠️ {msg}")
+
     if not warnings:
         warnings.append("✅ 未检测到明显风险特征")
 
@@ -83,6 +99,18 @@ def check_url():
 
         # 4. 风险等级
         risk_level = get_risk_level(probability)
+
+        # --- Terminal Output for Debugging ---
+        print("-" * 50)
+        print(f"检测 URL: {url}")
+        print(f"钓鱼概率: {probability:.4f} (Score: {int((1-probability)*100)})")
+        print(f"风险等级: {risk_level}")
+        if warnings:
+            print("检测警告:")
+            for w in warnings:
+                print(f"  {w}")
+        print("-" * 50)
+        # -------------------------------------
 
         return jsonify({
             "url": url,

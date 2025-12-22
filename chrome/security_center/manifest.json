@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "网站安全中心",
+    "version": "1.0",
+    "description": "提供网站安全分析历史记录、黑名单管理及安全知识库。",
+    "permissions": [
+        "storage",
+        "tabs",
+        "activeTab"
+    ],
+    "action": {
+        "default_title": "打开安全中心",
+        "default_popup": "pages/popup.html"
+    },
+    "options_page": "pages/security_center.html",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    }
+}

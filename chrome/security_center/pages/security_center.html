@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站安全中心</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">🛡️</div>
+                <h1>安全中心</h1>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="history">
+                    <span class="icon">🕒</span>
+                    <span>历史记录</span>
+                </button>
+                <button class="nav-item" data-tab="blacklist">
+                    <span class="icon">⛔</span>
+                    <span>黑名单管理</span>
+                </button>
+                <button class="nav-item" data-tab="knowledge">
+                    <span class="icon">📚</span>
+                    <span>安全知识库</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Version 1.0.0</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <h2 id="page-title">历史记录</h2>
+                <div class="top-bar-actions">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="btn btn-secondary btn-sm" aria-label="切换主题">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    <!-- User Status -->
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        <span>保护中</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Content Sections -->
+            <div class="content-wrapper">
+
+                <!-- History Section -->
+                <section id="history-section" class="tab-content active">
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3>最近拦截与分析记录</h3>
+                            <div class="actions">
+                                <button class="btn btn-secondary btn-sm" id="clear-history">清空记录</button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>URL</th>
+                                        <th>威胁等级</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-list">
+                                    <!-- Populated by JS -->
+                                    <tr class="empty-state">
+                                        <td colspan="4">暂无记录</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Blacklist Section -->
+                <section id="blacklist-section" class="tab-content">
+                    <div class="card glass-panel mb-4">
+                        <div class="card-header">
+                            <h3>添加黑名单</h3>
+                            <p class="subtitle">手动阻止访问特定域名或 URL</p>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="blacklist-input" placeholder="请输入要拦截的网址 (例如: example.com)">
+                            <button class="btn btn-primary" id="add-blacklist-btn">添加拦截</button>
+                        </div>
+                    </div>
+
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3>已拦截列表</h3>
+                            <span class="badge" id="blacklist-count">0 个</span>
+                        </div>
+                        <div class="list-container" id="blacklist-items">
+                            <!-- Populated by JS -->
+                            <div class="empty-message">黑名单为空</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Knowledge Base Section -->
+                <section id="knowledge-section" class="tab-content">
+                    <div class="grid-layout">
+                        <!-- Threat 1: Malicious URLs (Module 1) -->
+                        <div class="card glass-panel knowledge-card">
+                            <div class="icon-header">🔗</div>
+                            <h3>恶意链接传播</h3>
+                            <p>攻击者通过邮件或短信传播已知的钓鱼网址。<b>解决模块：模块 1 (智能拦截)</b></p>
+                            <span class="learn-more" data-topic="threat-url">了解更多</span>
+                        </div>
+
+                        <!-- Threat 2: Low Reputation (Module 2) -->
+                        <div class="card glass-panel knowledge-card">
+                            <div class="icon-header">⚠️</div>
+                            <h3>网站信誉风险</h3>
+                            <p>某些网站虽然未被列入黑名单，但表现出高风险特征。<b>解决模块：模块 2 (安全评分)</b></p>
+                            <span class="learn-more" data-topic="threat-reputation">了解更多</span>
+                        </div>
+
+                        <!-- Threat 3: Visual Deception (Module 3) -->
+                        <div class="card glass-panel knowledge-card">
+                            <div class="icon-header">👁️</div>
+                            <h3>视觉欺诈与伪造</h3>
+                            <p>网站模仿银行或官方机构的登录界面进行欺诈。<b>解决模块：模块 3 (DOM 分析)</b></p>
+                            <span class="learn-more" data-topic="threat-visual">了解更多</span>
+                        </div>
+
+                        <!-- Threat 4: False Security (Module 5) -->
+                        <div class="card glass-panel knowledge-card">
+                            <div class="icon-header">🔓</div>
+                            <h3>虚假安全陷阱</h3>
+                            <p>网站使用 HTTPS 但证书不可信，或包含混合内容。<b>解决模块：模块 5 (透明报告)</b></p>
+                            <span class="learn-more" data-topic="threat-https">了解更多</span>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Modal for Detailed Views -->
+        <div id="knowledge-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <div class="modal-body" id="modal-body-content">
+                    <!-- Generic Content -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Transparency Report (New) -->
+        <div id="report-modal" class="modal-overlay">
+            <div class="modal-content report-content">
+                <button class="close-modal" id="report-close-btn">&times;</button>
+                <div class="modal-body">
+                    <div class="report-header">
+                        <!-- Removed Icon -->
+                        <div class="header-text">
+                            <h2 id="report-title">威胁标题</h2>
+                            <span class="report-timestamp" id="report-time">2023-10-27 10:23</span>
+                        </div>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>⚠️ 威胁说明</h4>
+                        <p id="report-description">描述内容...</p>
+                    </div>
+
+                    <div class="report-grid">
+                        <div class="report-section">
+                            <h4>⚠️ 潜在风险</h4>
+                            <ul class="risk-list" id="report-risks">
+                                <!-- JS Populated -->
+                            </ul>
+                        </div>
+                        <div class="report-section">
+                            <h4>🛡️ 安全建议</h4>
+                            <ul class="advice-list" id="report-advice">
+                                <!-- JS Populated -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="report-footer">
+                        <div class="info-row">
+                            <span class="label">拦截 ID:</span>
+                            <code id="report-id">BLOCK-XXX</code>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">URL:</span>
+                            <code id="report-url" class="url-code">http://example.com</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/security_center.js"></script>
+</body>
+
+</html>
