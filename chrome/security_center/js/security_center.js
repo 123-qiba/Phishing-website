@@ -390,12 +390,14 @@ const knowledgeDB = {
         title: 'URL 结构与伪造欺诈',
         content: `
             <p>攻击者通过操纵 URL 字符串来混淆视听，诱导用户认为自己访问的是合法网站。</p>
-            <h3>检测特征 (模块 1：URL 规则)</h3>
+            <h3>检测特征 (URL 规则)</h3>
             <ul>
-                <li><strong>IP 地址直连</strong>：合法网站极少使用裸 IP (如 <code>http://192.168.x.x</code>)。</li>
-                <li><strong>短链接混淆</strong>：使用 bit.ly 等服务隐藏真实目的地址。</li>
-                <li><strong>特殊符号欺骗</strong>：利用 <code>@</code> 符号 (浏览器会忽略其前面的内容) 或双斜杠 <code>//</code> 进行重定向跳转。</li>
-                <li><strong>形似域名</strong>：使用连字符 <code>-</code> (如 <code>paypal-secure.com</code>) 模仿知名品牌。</li>
+                <li><strong>IP 地址直连</strong>：合法网站极少使用裸 IP (如 <code>http://192.168.x.x</code>)。<br><em style="color:#666;font-size:0.9em;">危害：绕过基于域名的信誉检测；常用于僵尸网络或临时搭建的钓鱼站点，使其难以追踪和封锁。</em></li>
+                <li><strong>短链接混淆</strong>：使用 bit.ly 等服务隐藏真实目的地址。<br><em style="color:#666;font-size:0.9em;">危害：隐藏真实的目标 URL，使用户无法在点击前通过肉眼判断目标网站的安全性，常用于短信或社交媒体传播。</em></li>
+                <li><strong>特殊符号欺骗</strong>：利用 <code>@</code> 符号 (浏览器会忽略其前面的内容) 或双斜杠 <code>//</code> 进行重定向跳转。<br><em style="color:#666;font-size:0.9em;">危害：利用浏览器解析 URL 的特性，将用户重定向到攻击者控制的恶意网站，而用户看到的可能仍是合法域名。</em></li>
+                <li><strong>形似域名</strong>：使用连字符 <code>-</code> (如 <code>paypal-secure.com</code>) 模仿知名品牌。<br><em style="color:#666;font-size:0.9em;">危害：利用视觉上的相似性（如 rn 模仿 m）欺骗用户的眼睛，使其误以为访问的是官方网站。</em></li>
+                <li><strong>URL 长度可疑</strong>：URL 字符串过长 (>=54 字符)，常用于隐藏恶意参数。<br><em style="color:#666;font-size:0.9em;">危害：攻击者可能在 URL 中嵌入大量的恶意参数、Token 或 payload，用于绕过特征检测或执行跨站脚本攻击 (XSS)。</em></li>
+                <li><strong>过多重定向</strong>：网站在加载过程中发生多次跳转 (>=4 次)，试图绕过静态检测。<br><em style="color:#666;font-size:0.9em;">危害：通过多次跳转“洗白”流量，断开安全扫描器的追踪链，或根据用户指纹决定是否展示真实的钓鱼页面。</em></li>
             </ul>
         `
     },
@@ -403,12 +405,13 @@ const knowledgeDB = {
         title: '域名信誉与生命周期',
         content: `
             <p>钓鱼网站通常生命周期极短（“日抛型”），且缺乏完整的注册信息。</p>
-            <h3>检测特征 (模块 2：信誉分析)</h3>
+            <h3>检测特征 (信誉分析)</h3>
             <ul>
-                <li><strong>注册时间过短</strong>：域名注册少于 6 个月或刚刚注册。</li>
-                <li><strong>WHOIS 异常</strong>：隐藏注册人信息或查询失败。</li>
-                <li><strong>无 DNS 记录</strong>：域名对应的 A 记录为空或解析异常。</li>
-                <li><strong>HTTPS 滥用</strong>：即使有 HTTPS 锁图标，如果证书是免费/短期的，依然可能不安全。</li>
+                <li><strong>注册时间过短</strong>：域名注册少于 6 个月或刚刚注册。<br><em style="color:#666;font-size:0.9em;">危害：绝大多数合法商业网站都有较长的运营历史。新注册域名极有可能是为了此次钓鱼活动专门申请的“日抛型”域名。</em></li>
+                <li><strong>WHOIS 异常</strong>：隐藏注册人信息或查询失败。<br><em style="color:#666;font-size:0.9em;">危害：隐藏注册人真实身份以逃避法律追究；或因域名配置不全，表明其并未打算长期正规运营。</em></li>
+                <li><strong>无 DNS 记录</strong>：域名对应的 A 记录为空或解析异常。<br><em style="color:#666;font-size:0.9em;">危害：域名无法正常解析，通常意味着该域名处于被封锁、未激活或非正常服务状态。</em></li>
+                <li><strong>HTTPS 滥用</strong>：即使有 HTTPS 锁图标，如果证书是免费/短期的，依然可能不安全。<br><em style="color:#666;font-size:0.9em;">危害：利用免费 SSL 证书获取“锁”图标，消除用户戒心。用户往往误以为有 HTTPS 锁就是绝对安全的。</em></li>
+                <li><strong>过多子域名</strong>：域名包含过多层级 (点号 > 5)，通常用于构建临时或随机生成的钓鱼链接。<br><em style="color:#666;font-size:0.9em;">危害：利用动态 DNS 或被入侵的泛域名，生成大量随机子域名分发特定的钓鱼链接，以逃避黑名单封锁。</em></li>
             </ul>
         `
     },
@@ -416,12 +419,13 @@ const knowledgeDB = {
         title: '页面内容与恶意行为',
         content: `
             <p>即使 URL 看起来正常，页面内部的代码可能包含窃取数据的逻辑或恶意脚本。</p>
-            <h3>检测特征 (模块 3：DOM 分析)</h3>
+            <h3>检测特征 (DOM 分析)</h3>
             <ul>
-                <li><strong>异常表单 (SFH)</strong>：登录表单的提交地址为空 (<code>about:blank</code>) 或指向第三方域名。</li>
-                <li><strong>隐蔽框架 (Iframe)</strong>：使用肉眼不可见的 iframe 覆盖层劫持点击。</li>
-                <li><strong>状态栏伪造</strong>：利用 <code>onmouseover</code> 修改浏览器状态栏显示的 URL，掩盖真实链接。</li>
-                <li><strong>弹窗滥用</strong>：利用 <code>window.open</code> 或大量弹窗干扰用户操作。</li>
+                <li><strong>异常表单 (SFH)</strong>：登录表单的提交地址为空 (<code>about:blank</code>) 或指向第三方域名。<br><em style="color:#666;font-size:0.9em;">危害：将用户输入的敏感信息（账号密码）直接提交到攻击者控制的服务器，导致信息直接泄露。</em></li>
+                <li><strong>隐蔽框架 (Iframe)</strong>：使用肉眼不可见的 iframe 覆盖层劫持点击。<br><em style="color:#666;font-size:0.9em;">危害：加载透明或恶意页面，诱导用户点击（点击劫持），在用户不知情的情况下执行敏感操作。</em></li>
+                <li><strong>状态栏伪造</strong>：利用 <code>onmouseover</code> 修改浏览器状态栏显示的 URL，掩盖真实链接。<br><em style="color:#666;font-size:0.9em;">危害：当鼠标悬停时显示合法 URL，点击后却跳转到恶意地址，利用用户的信任进行欺诈。</em></li>
+                <li><strong>弹窗滥用</strong>：利用 <code>window.open</code> 或大量弹窗干扰用户操作。<br><em style="color:#666;font-size:0.9em;">危害：制造紧迫感（如“系统中毒”伪告警）或锁定浏览器，迫使用户下载恶意软件或拨打诈骗电话。</em></li>
+                <li><strong>邮件数据窃取</strong>：尝试将用户输入的数据通过邮件 (mailto) 或后端接口发送给攻击者，而非合法服务器处理。<br><em style="color:#666;font-size:0.9em;">危害：利用本地邮件客户端直接发送数据，绕过常规 HTTP 监控，窃取用户隐私。</em></li>
             </ul>
         `
     },
@@ -429,7 +433,7 @@ const knowledgeDB = {
         title: 'AI 深度学习综合研判',
         content: `
             <p>针对“未知威胁”，系统利用训练好的深度神经网路模型进行概率预测。</p>
-            <h3>检测机制 (模块 4：智能核心)</h3>
+            <h3>检测机制 (智能核心)</h3>
             <ul>
                 <li><strong>1D-CNN 模型</strong>：后端部署的一维卷积神经网络。</li>
                 <li><strong>30 维特征向量</strong>：将上述所有 URL、域名、内容特征转化为数值向量输入模型。</li>
