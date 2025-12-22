@@ -105,9 +105,15 @@ async function checkAndMaybeBlock(tabId, url) {
     chrome.action.setBadgeText({ text: "!", tabId: tabId });
     chrome.action.setBadgeBackgroundColor({ color: "#e74c3c", tabId: tabId });
 
+    // Double check: Explicitly ignore low risk
+    if (riskLevel === "low") {
+      console.log("Risk is low, skipping interception.");
+      return;
+    }
+
     // 需要拦截：跳转到拦截页面
-    // 用户要求：只要有警告就拦截，同时如果风险等级是 medium/high/critical 也拦截
-    if (hasWarning || riskLevel === "critical" || riskLevel === "high" || riskLevel === "medium") {
+    // 用户要求：只有中等威胁以上的才会被拦截 (riskLevel >= medium)
+    if (riskLevel === "critical" || riskLevel === "high" || riskLevel === "medium") {
       const blockedPageUrl =
         chrome.runtime.getURL("blocked/blocked.html") +
         "?url=" + encodeURIComponent(url) +

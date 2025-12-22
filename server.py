@@ -2,7 +2,7 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from judge_port import extract_features, _load_blacklist
+from judge_port import extract_features, _load_blacklist, check_fixed_blacklist
 from predicting import predict_phishing_with_accuracy
 import os
 
@@ -106,6 +106,37 @@ def check_url():
         # 4. 风险等级
         risk_level = get_risk_level(probability)
 
+        # --- 新增: 手动黑名单 (Manual Blacklist) ---
+        # 如果都在黑名单里了，那肯定是高风险，不管模型怎么说
+        if len(features) > 29 and features[29] == 1:
+            risk_level = "high"
+
+
+        # --- 新增: 固定黑名单 (Stealth Mode) ---
+        # 优先级最高。如果命中，强制覆盖风险等级，并确保警告中不提"黑名单"
+        is_fixed_blocked = check_fixed_blacklist(url)
+        if is_fixed_blocked:
+            print(f"[Stealth Block] URL {url} hit fixed blacklist.")
+            risk_level = "critical"  # or "high"
+            
+            # 如果之前没有警告(或者只有低风险提示)，需要加一些"看起来很严重"的通用警告
+            # 以掩盖它是被黑名单拦截的事实
+            if not warnings or (len(warnings) == 1 and "✅" in warnings[0]):
+                warnings = []
+                warnings.append("⚠️ 检测到高危恶意活动")
+                warnings.append("⚠️ 域名注册信息异常") # 伪造一个理由
+            
+            # 确保不要出现 "⚠️ 网站在黑名单中"
+            # (理论上 features[29] 是针对 manual blacklist 的，如果不共用文件，这里不应该出现。
+            #  但为了双重保险，过滤一下)
+            warnings = [w for w in warnings if "黑名单" not in w]
+            
+            # 确保至少有一个看起来很严重的警告
+            has_scary_warning = any("⚠️" in w for w in warnings)
+            if not has_scary_warning:
+                 warnings.insert(0, "⚠️ 智能检测系统拦截: 极高风险")
+        # ---------------------------------------
+
         # --- Terminal Output for Debugging ---
         print("-" * 50)
         print(f"检测 URL: {url}")
@@ -162,6 +193,12 @@ def manage_blacklist():
             
             # 关键：清除 LRU 缓存，使 judge_port.py 重新读取文件
             _load_blacklist.cache_clear()
+            # 同时也清除固定黑名单缓存，以防万一未来合并管理
+            try:
+                from judge_port import _load_fixed_blacklist
+                _load_fixed_blacklist.cache_clear()
+            except:
+                pass
             print("黑名单已更新，缓存已清除")
             
             return jsonify({"status": "ok", "count": len(unique_list)})

@@ -587,6 +587,16 @@ def feat_Google_Index(url):
 #   几乎没有且页面很像落地页 => -1（谨慎）
 # - 抓不到页面 => 0
 # ---------------------------------------------------
+
+# ---------------------------------------------------
+# 28. Links_pointing_to_page（不做外部反链API：改为“站内引用强度”近似）
+# 规则：
+# - 能抓到页面：统计“内部链接数量”
+#   内部链接很多 => 更像正常（1）
+#   少量 => 0
+#   几乎没有且页面很像落地页 => -1（谨慎）
+# - 抓不到页面 => 0
+# ---------------------------------------------------
 def feat_Links_pointing_to_page(url):
     try:
         domain = get_domain(url).split(":")[0].lower()
@@ -617,6 +627,60 @@ def feat_Links_pointing_to_page(url):
             return 1
     except Exception:
         return 0
+
+
+# ---------------------------------------------------
+# Fixed Blacklist Helper (Stealth List)
+# ---------------------------------------------------
+@lru_cache(maxsize=1)
+def _load_fixed_blacklist():
+    """
+    加载固定黑名单 (fixed_blacklist.txt).
+    这些域名会被强制拦截，但不显示'黑名单'理由。
+    """
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "fixed_blacklist.txt"),
+        os.path.join(os.path.dirname(__file__), "data", "fixed_blacklist.txt"),
+    ]
+    path = next((p for p in candidates if os.path.exists(p)), None)
+    if not path:
+        return set()
+
+    s = set()
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            d = line.strip().lower()
+            if not d or d.startswith("#"):
+                continue
+            
+            # 自动清理：如果用户输入的是完整URL，提取其域名
+            if "://" in d:
+                try:
+                    d = urlparse(d).netloc.lower()
+                except:
+                    pass
+            # 移除可能存在的路径或斜杠
+            d = d.split('/')[0].split(':')[0]
+            
+            if d:
+                s.add(d)
+    return s
+
+def check_fixed_blacklist(url):
+    """
+    检查 URL 是否在固定黑名单中。
+    返回 True 表示命中。
+    """
+    domain = get_domain(url).split(":")[0].lower()
+    bl = _load_fixed_blacklist()
+    if not bl:
+        return False
+    
+    for b in bl:
+        if domain == b or domain.endswith("." + b):
+            return True
+            
+    return False
 
 
 # ---------------------------------------------------
